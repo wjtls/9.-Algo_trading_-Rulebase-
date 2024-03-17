@@ -148,45 +148,7 @@ class Env:
         end_date=data_count[1]
         symbol=coin_symbol.replace('/','')
         data = []
-
-        URL = 'https://api.binance.com/api/v3/klines'  # 바이낸스
-        COLUMNS = ['Datetime', 'open', 'high', 'low', 'close', 'volume', 'Close_time', 'quote_av', 'trades',
-                   'tb_base_av', 'tb_quote_av', 'ignore']
-
-
-        start = int(time.mktime(datetime.strptime(start_date , '%Y-%m-%d %H:%M').timetuple())) * 1000
-        end = int(time.mktime(datetime.strptime(end_date , '%Y-%m-%d %H:%M').timetuple())) * 1000
-        params_ = {
-            'symbol': symbol,
-            'interval': '1m',
-            'limit': 1000,
-            'startTime': start,
-            'endTime': end
-        }
-
-        print('datetime  1000개 마다 호출')
-
-        while start < end:
-            print(datetime.fromtimestamp(start // 1000))
-            params_['startTime'] = start
-
-            for step in range(20):
-                try:
-                    result = requests.get(URL, params=params_)
-                    break
-                except:
-                    print('재접속 시도',step)
-                    continue
-            js = result.json()
-            if not js:
-                break
-            data.extend(js)  # result에 저장
-            start = js[-1][0] + 60000  # 다음 step으로
-        # 전처리
-        if not data:  # 해당 기간에 데이터가 없는 경우
-            print('해당 기간에 일치하는 데이터가 없습니다.')
-            return -1
-        df = pd.DataFrame(data)
+           '코인, 주식데이터 호출부분'
         df.columns = COLUMNS
         df['Datetime'] = df.apply(lambda x: datetime.fromtimestamp(x['Datetime'] // 1000), axis=1)
         df = df.drop(columns=['Close_time', 'ignore'])
