@@ -19,16 +19,6 @@ import pandas as pd
 env=env_.Env()
 params.real_or_train='real'
 
-if params.trading_site =='binance':
-    API_key =params.Binance_API_key
-    Secret_key =params.Binance_Secret_key
-
-if params.trading_site =='upbit':
-    API_key = params.Upbit_API_key
-    Secret_key = params.Upbit_Secret_key
-
-
-
 
 
 def real_save_price_data(data,ind_data,data_name):
