@@ -24,7 +24,7 @@
 
 <figure>
   <img src="https://github.com/wjtls/9.-Algo_trading_-Rulebase-/assets/60399060/24c59cff-19b7-4ab1-8942-25aa7a76b9e5" width="300">
-  <figcaption>여기에 이미지 제목을 씁니다</figcaption>
+  <figcaption>BTC 백테스트,  </figcaption>
 </figure>
 - 백테스트 및 실전매매 (포지션, 전체 PV)
 - MDD , 수익률, 표준편차등 계산
