@@ -34,7 +34,7 @@ class ind_env:
         self.MD=0
         pass
 
-    "지표 모음"
+        "지표 함수들 모음"
 
 
 
