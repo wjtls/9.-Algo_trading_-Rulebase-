@@ -15,9 +15,9 @@ np.random.seed(seed)
 torch.manual_seed(seed)
 
 
-trading_site = 'binance'   #binance , upbit
-Binance_API_key ='UbZY1VhFGcMulvGLCx6VDshTL1UwggdGO2iowDodyJBBMbXF3isx69zLAszLRdug'
-Binance_Secret_key ='C3QO3OfWQxs60G2GuGDXcZXJa6IODle7nlMlqsfH1kGNCAuzBBPUcmRdkFmmOyOT'
+trading_site = 
+Binance_API_key =
+Binance_Secret_key =
 
 
 
@@ -30,8 +30,8 @@ Binance_Secret_key ='C3QO3OfWQxs60G2GuGDXcZXJa6IODle7nlMlqsfH1kGNCAuzBBPUcmRdkFm
 
 
 
-API_coin_name=['BTC'] #코인명(실제 트레이딩시 사용)
-API_data_name=['BTC/USDT'] # 바이낸스 API에서 불러올 이름####################################################
+API_coin_name=[] #종목명(실제 트레이딩시 사용)
+API_data_name=[] #  API에서 불러올 이름####################################################
 
 data_count=['2020-01-01 00:00', '2024-03-07 22:06']   #호출할 데이터 갯수[날짜 , count]  학습시 날짜이전 count 만큼 호출 #####################################시 분초 쓰지않음
 api_data_count=99999900 #실시간 트레이딩 할때 불러올 API data 갯수( 회당 1000개정도가 한계)
