@@ -26,5 +26,5 @@ import urllib.request
 
 class news_ind:
     def __init__(self,minute):
-       "뉴스데이터 기반 지표 "
+       "뉴스데이터 기반 지표 모음"
 
