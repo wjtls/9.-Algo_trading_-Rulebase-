@@ -20,6 +20,11 @@
   <img src="https://github.com/wjtls/9.-Algo_trading_-Rulebase-/assets/60399060/24c59cff-19b7-4ab1-8942-25aa7a76b9e5" width="300">
   <figcaption>현물(BTC 2020~ 2024.3) 백테스트 예시 </figcaption>
 </figure>
+<figure>
+  <img src="https://github.com/wjtls/9.-Algo_trading_-Rulebase-/assets/60399060/24c59cff-19b7-4ab1-8942-25aa7a76b9e5" width="300">
+  <figcaption>선물(BTC 2020~ 2024.3) 백테스트 예시 </figcaption>
+</figure>
+<br>
 <br>
 - 백테스트 및 실전매매 (포지션, 전체 PV)
 - MDD , 수익률, 표준편차등 계산
