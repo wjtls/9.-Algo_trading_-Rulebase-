@@ -834,21 +834,13 @@ class Rule_agent():
         # EL 이 들어갈때 if B1=True
         # ES 가 들어갈때 is S1=True
 
-        ind_CCI = self.long_ori_input[params.long_ind_name.index('CCI_trend')]  #지표
+        ind_CCI = self.long_ori_input[params.long_ind_name.index('CCI_trend')]  #지표 불러오기
         NNCO_up_L = self.long_ori_input[params.long_ind_name.index('NNCO_up_L')]
         NNCO_down_L =self.long_ori_input[params.long_ind_name.index('NNCO_down_L')]
 
-        if step>4:
-            if  (NNCO_up_L[step] < NNCO_down_L[step] and NNCO_up_L[step-1] > NNCO_down_L[step]) :  #매도
-                if self.stock > 0 :
-                    self.long_EL1(adj_price_data, step)
-
-            elif (ind_CCI[step]>0) and (NNCO_up_L[step] > NNCO_down_L[step] and NNCO_up_L[step-1] < NNCO_down_L[step]) :
-                if self.B1==False:
-                    self.long_B1(adj_price_data,step)
-            else:
-                pass
-
+        '''''
+        알고리즘 전략 부분
+        '''''
         return self.action, self.unit
 
 
@@ -1139,95 +1131,5 @@ class Rule_agent():
         return action, unit
 
 
-
-
-'''''
-    def long_decide_action(self, policy, deposit):  # 롱포지션 ,관망(청산) : 롱온리 액션
-        policy1 = torch.clamp(policy, 0, 1)
-        self.action_s = Categorical(policy1)
-        self.action = self.action_s.sample()
-
-        # 학습일때
-        limit_long_unit = 1  # 스탭당  최대 롱 계약
-        limit_long_eq = 1  #
-        max_trade_unit = 6  # 가질수 있는 최대 계약수
-
-
-
-        if self.back_testing == True:  # 백테스팅중인 경우
-            self.action = torch.argmax(policy1)
-            limit_long_unit = 1
-            max_trade_unit = 6
-
-        if self.action == 0:  # 롱 청산
-            unit0 = max((policy1[0] * self.long_unit), 1)
-            unit0 = round(float(unit0))
-            if unit0 >= limit_long_eq:
-                unit0 = limit_long_eq
-            elif unit0 < 1:
-                unit0 = 1
-            unit = [unit0, 0, 0]
-
-        elif self.action == 2:  # 롱 포지션
-            unit2 = (policy1[2] * self.cash) / deposit
-            unit2 = round(float(unit2))
-
-            if unit2 >= limit_long_unit:  # 유닛수가 리미트보다 크면 리미트로 제한
-                unit2 = limit_long_unit
-
-            if self.long_unit >= max_trade_unit:
-                unit2 = 0
-
-            unit = [0, 0, unit2]
-
-        else:  # 관망
-            unit = [0, 0, 0]
-
-        return self.action, unit
-
-
-    def short_decide_action(self, policy, deposit):  # 롱숏 포지션
-        policy1 = torch.clamp(policy, 0, 1)
-        self.action_s = Categorical(policy1)
-        self.action = self.action_s.sample()
-
-
-        # 학습일때
-        limit_short_unit = 1  # 스탭당  최대 숏 계약
-        limit_short_eq = 1
-        max_trade_unit = 6
-
-        if self.back_testing == True:  # 백테스팅일때
-            self.action = torch.argmax(policy1)
-            limit_short_unit = 1  # 스탭당 최대 거래 계약수 제한
-            max_trade_unit = 6  # 최대 보유 유닛 제한
-
-        if self.action == 0:  # 숏 청산
-            # 숏
-            unit0 = max((policy1[0] * self.cash) / deposit, 1)
-            unit0 = round(float(unit0))
-            if unit0 >= limit_short_eq:
-                unit0 = limit_short_eq
-            elif unit0 < 1:
-                unit0 = 1
-
-            unit = [unit0, 0, 0]
-
-        elif self.action == 2:  # 숏 매수
-            unit2 = (policy1[2] * self.cash) / deposit
-            unit2 = round(float(unit2))
-
-            if unit2 >= limit_short_unit:
-                unit2 = limit_short_unit
-
-            if self.short_unit >= max_trade_unit:
-                unit2 = 0
-            unit = [0, 0, unit2]
-
-        else:  # 관망
-            unit = [0, 0, 0]
-
-        return self.action, unit
-'''''
 
 
