@@ -12,19 +12,14 @@
 - 지표 커스텀
 - 전략 커스텀
 - 세부 파라미터 커스텀 (수수료, 슬리피지, 금액, 증거금, 분봉 등)
-  
-<br>
-<br>
-<br>
-
-
 <br>
 <br>
 <br>
 
 <figure>
   <img src="https://github.com/wjtls/9.-Algo_trading_-Rulebase-/assets/60399060/24c59cff-19b7-4ab1-8942-25aa7a76b9e5" width="300">
-  <figcaption>BTC 백테스트,  </figcaption>
+  <figcaption>현물(BTC 2020~ 2024.3) 백테스트 예시,  </figcaption>
 </figure>
+<br>
 - 백테스트 및 실전매매 (포지션, 전체 PV)
 - MDD , 수익률, 표준편차등 계산
