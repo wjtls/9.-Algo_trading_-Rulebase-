@@ -958,36 +958,12 @@ class Env:
                     model.long_price = []
                     model.long_aver_price = 0
 
-                else:  # 가진 계약 충분한 경우
-                    model.long_unit -= unit[0]
-                    model.cash += (unit[0] * model.deposit) + (model.price - model.long_aver_price) * unit[0]
-
-                    model.long_price.append(-model.long_aver_price * unit[0])
-                    if model.long_unit == 0:
-                        model.long_aver_price = 0
-                    else:
-                        model.long_aver_price = np.sum(model.long_price) / model.long_unit
 
 
 
 
         elif action == 2:  # 롱포지션일경우
 
-            '''''
-            if params.train_stock_or_future !='future':
-                if model.cash > 0 :  # 현금있을때
-                    model.cash -= unit[2] * model.deposit
-
-                    model.long_price.append((model.price + model.slip) * unit[2])
-                    model.long_unit += unit[2]
-                    if model.long_unit == 0:
-                        model.long_aver_price = 0
-                    else:
-                        model.long_aver_price = np.sum(model.long_price) / model.long_unit
-
-                else:  # 1주도 못사는경우
-                    unit[2] = 0
-            '''''
 
             if params.train_stock_or_future =='future':
                 if model.cash >= unit[2] * model.deposit:  # 가진현금이 사려고하는 가격보다 많을때
@@ -1001,21 +977,6 @@ class Env:
                         model.long_aver_price = np.sum(model.long_price) / model.long_unit
 
 
-                elif model.cash < model.deposit:  # 유닛대비 현금부족
-                    quotient, remainder = divmod(float(model.cash), float(model.deposit))  # 몫과 나머지
-                    unit[2] = quotient
-                    model.cash -= unit[2] * model.deposit
-
-                    model.long_price.append((model.price + model.slip) * unit[2])
-                    model.long_unit += unit[2]
-                    if model.long_unit == 0:
-                        model.long_aver_price = 0
-                    else:
-                        model.long_aver_price = np.sum(model.long_price) / model.long_unit
-
-                else:  # 1주도 못사는경우
-                    unit[2] = 0
-
 
         else:  # 관망일경우
             model.cash = model.cash
@@ -1028,62 +989,6 @@ class Env:
 
         reward = 0
         bonus = 0
-
-        if model.back_testing == False:
-            Rs = ((model.price_data[step + 1] - (model.price_data[step] - model.slip)) / model.price_data[step]) * (
-            unit[0])  # reward scaling (MInmaxscaler 사용시 분포의 표준편차가 변함)
-            Rh = ((model.price_data[step + 1] - model.price_data[step]) / model.price_data[step]) * (unit[1])
-            Rb = ((model.price_data[step + 1] - (model.price_data[step] + model.slip)) / model.price_data[step]) * (unit[2])
-
-            reward = torch.Tensor(Rh - Rs + Rb - (np.abs(Rs) * 0.00015 + Rb * 0.00015))
-            reward = reward * bonus
-            # reward clipping [-10,10]
-
-        cost = (unit[0] *model.deposit * model.cost) + (unit[2] * model.deposit * model.cost)
-        # 롱 PV계산
-
-        model.cash -= cost  # 수수료를 지불
-        model.PV = (model.long_unit * model.deposit) + (model.price - model.long_aver_price) * model.long_unit + model.cash  # 보유계약가치 + 순손익 + 현금 PV업데이트
-        model.PV_list.append(model.PV)
-
-        if params.PV_reward == True:
-            # 포트폴리오 가치의 변화를 고려한 리워드 계산
-            previous_portfolio_value = model.PV_list[step]
-            current_portfolio_value = model.PV_list[step + 1]  # 위에서 새로운 PV가 들어왔으므로 업데이트된 현 PV는 step+1임
-            portfolio_value_gab = (current_portfolio_value - previous_portfolio_value) / previous_portfolio_value
-
-            # PV는 롱일때만 증가 하거나 감소한다. 따라서 청산인경우 PV계산 추가
-            PV_unit_weight_L = 0
-
-            if model.long_unit >= 1:  # 가진유닛이 있는경우 long PV 계산, 청산 상태일때 short인경우 PV계산
-                PV_unit_weight_L = 1
-            else:
-                PV_unit_weight_L = 0
-
-            PV_b = portfolio_value_gab * PV_unit_weight_L * bonus
-            # 최종 리워드 계산 (기존 리워드와 포트폴리오 가치의 변화를 고려한 리워드를 합침)
-            reward = reward + PV_b
-
-        if params.PV_reward_only == True:
-            reward1 = torch.log(model.PV_list[step + 1] / model.PV_list[step])
-            reward = reward1 * bonus
-            reward_weight = 2
-
-            if model.PV_list[step + 1] < params.cash * ( 3 / 4) and reward1 < 0:  # PV가 초기원금의 설정 기준 미만인경우 손실시 리워드가 마이너스 인경우만 더큰 -보상
-                reward = reward * reward_weight
-
-        if model.PV <= model.deposit:  # PV가 증거금 이하로 떨어질시
-            model.PV = model.PV
-            model.cash = model.cash
-            reward = torch.Tensor([-model.long_unit]) * bonus
-
-        if model.PV <= 0:
-            model.PV = 0
-            model.cash = 0
-            model.stock = 0
-            model.short_unit = 0
-            model.long_unit = 0
-            reward = torch.Tensor([-1000]) * bonus
 
         if model.back_testing == False:
             reward = torch.clip(reward, -params.long_reward_clip, params.long_reward_clip)  # 롱 리워드 클립
@@ -1144,21 +1049,7 @@ class Env:
                         model.short_aver_price = np.sum(model.short_price) / model.short_unit
 
         if action == 2:  # 숏 포지션 매수
-            '''''
-            if params.train_stock_or_future !='future': #코인처럼 분할
-                if model.cash > 0 :  # 현금있을때
-                    model.cash -= unit[2] * model.deposit
-
-                    model.short_price.append((model.price + model.slip) * unit[2])
-                    model.short_unit += unit[2]
-                    if model.short_unit == 0:
-                        model.short_aver_price = 0
-                    else:
-                        model.short_aver_price = np.sum(model.short_price) / model.short_unit
-
-                else:  # 1주도 못사는경우
-                    unit[2] = 0
-            '''''
+           
 
             if params.train_stock_or_future =='future':
                 if model.cash >= unit[2] * model.deposit:
@@ -1170,18 +1061,6 @@ class Env:
                     else:
                         model.short_aver_price = np.sum(model.short_price) / model.short_unit  # 숏 매수 평단가
 
-
-                elif model.cash > model.deposit:  # 유닛대비 현금부족
-                    quotient, remainder = divmod(float(model.cash), float(model.price - model.slip))  # 몫과 나머지
-                    model.cash -= quotient * model.deposit
-                    unit[2] = quotient
-
-                    model.short_unit += unit[2]
-
-                    if model.short_unit == 0:
-                        pass
-                    else:
-                        model.short_aver_price = np.sum(model.short_price) / model.short_unit  # 숏 매수 평단가
                 else:
                     unit[0] = 0
 
@@ -1204,34 +1083,6 @@ class Env:
         model.PV = (model.short_unit * model.deposit) + (
                     model.short_aver_price - model.price) * model.short_unit + model.cash
         model.PV_list.append(model.PV)
-
-
-
-
-        if model.PV <= 0:
-            model.PV = 0
-            model.cash = 0
-            model.stock = 0
-            model.short_unit = 0
-            model.long_unit = 0
-            reward = torch.Tensor([-1000]) * bonus
-
-        if model.back_testing == False:
-            reward = torch.clip(reward, -params.short_reward_clip,
-                                params.short_reward_clip)  # reward clipping [-10,10]
-        # 현방식의 reward 계산 이유 : next time step 에서 가격이 증가하거나 감소할때 PV를 개선하기위함
-        # 추가소견:에이전트의 현시점 시장 대응력을 향상
-
-        model.action_data.append(action)
-        model.reward_data.append(reward)
-        model.step_data.append(step)
-
-        if params.traj_print == True:
-            print(model.Agent_num, '에이전트넘버', action, '액션', reward, '리워드', model.PV, 'PV', model.cash, 'cash',
-                  model.short_unit, 'short_stock',
-                  model.short_unit, '숏유닛',
-                  unit, '유닛', unit, '리워드계산시유닛', model.price, '가격', model.long_aver_price, '롱평단',
-                  model.short_aver_price, '숏평단')
 
 
         return action, reward, step
@@ -1273,13 +1124,7 @@ class Env:
                     model.stock += quotient + remainder
                     model.cash -= (quotient + remainder) * (model.price + model.slip)
                     unit[2] = quotient + remainder
-                else:
-                    quotient, remainder = divmod(float(model.cash), float(
-                        model.price + model.slip + (model.price * params.stock_cost)))  # 몫과 나머지
-
-                    model.stock += quotient
-                    model.cash -= quotient * (model.price + model.slip)
-                    unit[2] = quotient
+               
 
 
 
@@ -1304,22 +1149,10 @@ class Env:
         # 리워드 계산
         reward=0
 
-        if model.PV <= 0:
-            model.PV = 0
-            model.cash = 0
-            model.stock = 0
-            model.short_unit = 0
-            model.long_unit = 0
-            reward = torch.Tensor([-1000]) * bonus
-
 
         model.action_data.append(action)
         model.reward_data.append(reward)
         model.step_data.append(step)
-
-        if params.traj_print == True:
-            print(action, 'action', model.price, 'price', reward, '리워드', model.PV, 'PV',
-                  model.stock, 'stock', model.cash, 'cash', unit, 'unit', cost, 'cost', step, 'step')
 
         return action, reward, step
 
